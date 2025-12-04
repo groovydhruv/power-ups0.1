@@ -37,14 +37,22 @@ export default function ResourceList({ topic, onBack, onStartConversation }) {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0a', padding: '2rem', color: '#e0e0e0', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: '#f5f3f0',
+        padding: '2.5rem 2rem',
+        color: '#111827',
+        fontFamily: "'Fustat', 'Inter', -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      }}
+    >
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         <div style={{ marginBottom: '1.5rem' }}>
           <button
             onClick={onBack}
             style={{
               fontSize: '0.875rem',
-              color: '#999999',
+              color: '#6b7280',
               padding: '0.375rem 0.75rem',
               borderRadius: '0.25rem',
               border: 'none',
@@ -52,11 +60,11 @@ export default function ResourceList({ topic, onBack, onStartConversation }) {
               cursor: 'pointer',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#e0e0e0';
-              e.currentTarget.style.backgroundColor = '#1a1a1a';
+              e.currentTarget.style.color = '#111827';
+              e.currentTarget.style.backgroundColor = '#e5e7eb';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#999999';
+              e.currentTarget.style.color = '#6b7280';
               e.currentTarget.style.backgroundColor = 'transparent';
             }}
           >
@@ -65,10 +73,18 @@ export default function ResourceList({ topic, onBack, onStartConversation }) {
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
-          <h1 style={{ fontSize: '2.25rem', fontWeight: '600', color: '#e0e0e0', letterSpacing: '-0.02em', marginBottom: '0.5rem' }}>
+          <h1
+            style={{
+              fontSize: '2.25rem',
+              fontWeight: '600',
+              color: '#111827',
+              letterSpacing: '-0.02em',
+              marginBottom: '0.5rem',
+            }}
+          >
             {topic.title}
           </h1>
-          <p style={{ fontSize: '1rem', color: '#999999', fontWeight: '400' }}>
+          <p style={{ fontSize: '1rem', color: '#6b7280', fontWeight: '400' }}>
             {topic.description}
           </p>
         </div>
@@ -83,11 +99,11 @@ export default function ResourceList({ topic, onBack, onStartConversation }) {
               <div
                 key={resource.id}
                 style={{
-                  borderRadius: '0.5rem',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: '0.75rem',
+                  border: '1px solid rgba(15,23,42,0.08)',
                   overflow: 'hidden',
-                  backgroundColor: unlocked ? '#111111' : '#0d0d0d',
-                  opacity: unlocked ? 1 : 0.6,
+                  backgroundColor: unlocked ? '#ffffff' : '#f3f4f6',
+                  opacity: unlocked ? 1 : 0.7,
                 }}
               >
                 <div
@@ -103,18 +119,25 @@ export default function ResourceList({ topic, onBack, onStartConversation }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: '0.875rem', color: '#999999', fontWeight: '500' }}>
+                        <span style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '500' }}>
                           {index + 1}
                         </span>
-                        <span style={{ fontSize: '1rem', fontWeight: '500', color: '#e0e0e0', letterSpacing: '-0.01em' }}>
+                        <span
+                          style={{
+                            fontSize: '1rem',
+                            fontWeight: '500',
+                            color: '#111827',
+                            letterSpacing: '-0.01em',
+                          }}
+                        >
                           {resource.title}
                         </span>
                         {status.completed && status.conversationCompleted && (
-                          <CheckIcon color="#e0e0e0" boxSize={12} />
+                          <CheckIcon color="#16a34a" boxSize={12} />
                         )}
-                        {!unlocked && <LockIcon color="#999999" />}
+                        {!unlocked && <LockIcon color="#9ca3af" />}
                       </div>
-                      <p style={{ fontSize: '0.75rem', color: '#999999', marginTop: '0.125rem' }}>
+                      <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.125rem' }}>
                         {resource.type} · {resource.duration}
                       </p>
                     </div>
@@ -131,35 +154,37 @@ export default function ResourceList({ topic, onBack, onStartConversation }) {
                         style={{
                           padding: '0.5rem 1rem',
                           fontSize: '0.875rem',
-                          borderRadius: '0.25rem',
-                          border: '1px solid rgba(255,255,255,0.08)',
-                          color: status.started && !status.completed 
-                            ? '#b0b0b0' 
-                            : status.completed && status.conversationCompleted 
-                            ? '#999999' 
-                            : '#e0e0e0',
-                          backgroundColor: 'transparent',
+                          borderRadius: '999px',
+                          border: '1px solid rgba(148,163,184,0.6)',
+                          color:
+                            status.started && !status.completed
+                              ? '#4b5563'
+                              : status.completed && status.conversationCompleted
+                              ? '#9ca3af'
+                              : '#111827',
+                          backgroundColor:
+                            status.completed && status.conversationCompleted ? '#f9fafb' : 'transparent',
                           cursor: status.completed && status.conversationCompleted ? 'not-allowed' : 'pointer',
                         }}
                         onMouseEnter={(e) => {
                           if (!(status.completed && status.conversationCompleted)) {
-                            e.currentTarget.style.backgroundColor = '#1a1a1a';
-                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+                            e.currentTarget.style.backgroundColor = '#e5e7eb';
+                            e.currentTarget.style.borderColor = 'rgba(148,163,184,0.9)';
                           }
                         }}
                         onMouseLeave={(e) => {
                           if (!(status.completed && status.conversationCompleted)) {
                             e.currentTarget.style.backgroundColor = 'transparent';
-                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                            e.currentTarget.style.borderColor = 'rgba(148,163,184,0.6)';
                           }
                         }}
                       >
                         {getButtonText(resource)}
                       </button>
                       {isExpanded ? (
-                        <ChevronUpIcon boxSize={20} color="#999999" />
+                        <ChevronUpIcon boxSize={20} color="#9ca3af" />
                       ) : (
-                        <ChevronDownIcon boxSize={20} color="#999999" />
+                        <ChevronDownIcon boxSize={20} color="#9ca3af" />
                       )}
                     </div>
                   )}
@@ -167,7 +192,15 @@ export default function ResourceList({ topic, onBack, onStartConversation }) {
 
                 {isExpanded && unlocked && (
                   <div style={{ padding: '0 1.25rem 1.25rem 1.25rem' }}>
-                    <p style={{ fontSize: '0.875rem', color: '#999999', lineHeight: '1.6', marginTop: '0.5rem', marginBottom: '1rem' }}>
+                    <p
+                      style={{
+                        fontSize: '0.875rem',
+                        color: '#6b7280',
+                        lineHeight: '1.6',
+                        marginTop: '0.5rem',
+                        marginBottom: '1rem',
+                      }}
+                    >
                       {resource.description}
                     </p>
                     {resource.thumbnail && (
@@ -175,7 +208,7 @@ export default function ResourceList({ topic, onBack, onStartConversation }) {
                         style={{
                           position: 'relative',
                           width: '100%',
-                          height: '200px',
+                          height: '240px',
                           borderRadius: '0.5rem',
                           overflow: 'hidden',
                           cursor: 'pointer',
@@ -222,12 +255,14 @@ export default function ResourceList({ topic, onBack, onStartConversation }) {
                             pointerEvents: 'none',
                           }}
                         >
-                          <span style={{
-                            color: '#e0e0e0',
-                            fontSize: '1rem',
-                            fontWeight: '500',
-                            letterSpacing: '0.02em',
-                          }}>
+                          <span
+                            style={{
+                              color: '#f9fafb',
+                              fontSize: '1rem',
+                              fontWeight: '500',
+                              letterSpacing: '0.02em',
+                            }}
+                          >
                             Open Resource
                           </span>
                         </div>

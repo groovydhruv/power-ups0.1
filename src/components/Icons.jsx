@@ -90,3 +90,68 @@ export const CloseIcon = ({ color, ...props }) => (
   </svg>
 );
 
+export const LogoutIcon = ({ color, ...props }) => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M6 14H3.33333C2.97971 14 2.64057 13.8595 2.39052 13.6095C2.14048 13.3594 2 13.0203 2 12.6667V3.33333C2 2.97971 2.14048 2.64057 2.39052 2.39052C2.64057 2.14048 2.97971 2 3.33333 2H6M10.6667 11.3333L14 8M14 8L10.6667 4.66667M14 8H6"
+      stroke={color || 'currentColor'}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const MicIcon = ({ color, boxSize, ...props }) => (
+  <svg
+    width={boxSize || "24"}
+    height={boxSize || "24"}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M12 1C10.34 1 9 2.34 9 4V12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12V4C15 2.34 13.66 1 12 1Z"
+      fill={color || 'currentColor'}
+    />
+    <path
+      d="M19 10V12C19 15.87 15.87 19 12 19C8.13 19 5 15.87 5 12V10H3V12C3 16.41 6.32 20.06 10.5 20.85V24H13.5V20.85C17.68 20.06 21 16.41 21 12V10H19Z"
+      fill={color || 'currentColor'}
+    />
+  </svg>
+);
+
+export const MicOffIcon = ({ color, boxSize, ...props }) => (
+  <svg
+    width={boxSize || "24"}
+    height={boxSize || "24"}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M12 1C10.34 1 9 2.34 9 4V12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12V4C15 2.34 13.66 1 12 1Z"
+      fill={color || 'currentColor'}
+      opacity="0.4"
+    />
+    <path
+      d="M19 10V12C19 15.87 15.87 19 12 19C8.13 19 5 15.87 5 12V10H3V12C3 16.41 6.32 20.06 10.5 20.85V24H13.5V20.85C17.68 20.06 21 16.41 21 12V10H19Z"
+      fill={color || 'currentColor'}
+      opacity="0.4"
+    />
+    <path
+      d="M2.39 1.73L1.11 3L9 10.89V12C9 13.66 10.34 15 12 15C12.41 15 12.81 14.93 13.17 14.79L14.77 16.39C13.98 16.78 13.02 17 12 17C9.24 17 7 14.76 7 12V10.89L5 8.89V12C5 15.53 7.61 18.43 11 18.93V22H13V18.93C14.21 18.76 15.32 18.32 16.27 17.66L20.01 21.4L21.29 20.12L2.39 1.73ZM15 12V6.41L17 4.41V12C17 14.76 14.76 17 12 17L10.12 15.12C12.78 15.12 15 12.78 15 12Z"
+      fill={color || 'currentColor'}
+    />
+  </svg>
+);
+

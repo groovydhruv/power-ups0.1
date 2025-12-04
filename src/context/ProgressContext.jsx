@@ -10,15 +10,16 @@ export const useProgress = () => {
   return context;
 };
 
-export const ProgressProvider = ({ children }) => {
+export const ProgressProvider = ({ children, storageKey = 'learning-platform-progress' }) => {
   const [progress, setProgress] = useState(() => {
-    const saved = localStorage.getItem('learning-platform-progress');
+    const saved = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null;
     return saved ? JSON.parse(saved) : {};
   });
 
   useEffect(() => {
-    localStorage.setItem('learning-platform-progress', JSON.stringify(progress));
-  }, [progress]);
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(storageKey, JSON.stringify(progress));
+  }, [progress, storageKey]);
 
   const markResourceStarted = (resourceId) => {
     setProgress((prev) => ({
@@ -46,11 +47,15 @@ export const ProgressProvider = ({ children }) => {
   };
 
   const isResourceUnlocked = (topicId, resourceOrder, resources) => {
+    // First resource in a topic is always available
     if (resourceOrder === 1) return true;
+
     const prevResource = resources.find((r) => r.order === resourceOrder - 1);
     if (!prevResource) return true;
+
     const status = getResourceStatus(prevResource.id);
-    return status.completed && status.conversationCompleted;
+    // Unlock when the previous resource has been marked complete
+    return status.completed;
   };
 
   const getTopicProgress = (topicId, resources) => {
