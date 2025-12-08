@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ProgressProvider } from './context/ProgressContext';
 import TopicSelection from './components/TopicSelection';
 import ResourceList from './components/ResourceList';
 import VoiceConversation from './components/VoiceConversation';
 import UsernameScreen from './components/UsernameScreen';
+import { fetchTopics, fetchResourcesByTopic } from './lib/dataApi';
 
 export default function App() {
   const [username, setUsername] = useState(() => {
@@ -20,6 +21,20 @@ export default function App() {
   const [selectedResource, setSelectedResource] = useState(null);
   const [pendingConversationResource, setPendingConversationResource] = useState(null);
   const [showConversationConfirm, setShowConversationConfirm] = useState(false);
+  const [topics, setTopics] = useState([]);
+  const [resourcesByTopic, setResourcesByTopic] = useState({});
+  const [loadingData, setLoadingData] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoadingData(true);
+      const [t, r] = await Promise.all([fetchTopics(), fetchResourcesByTopic()]);
+      setTopics(t);
+      setResourcesByTopic(r);
+      setLoadingData(false);
+    };
+    load();
+  }, []);
 
   const handleSelectTopic = (topic) => {
     setSelectedTopic(topic);
@@ -81,11 +96,35 @@ export default function App() {
     return <UsernameScreen onComplete={handleUsernameComplete} />;
   }
 
+  if (loadingData) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          backgroundColor: '#f5f3f0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#111827',
+          fontFamily: "'Fustat', 'Inter', -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        }}
+      >
+        Loading...
+      </div>
+    );
+  }
+
   return (
-    <ProgressProvider storageKey={`learning-platform-progress-${username}`} key={username}>
+    <ProgressProvider
+      storageKey={`learning-platform-progress-${username}`}
+      username={username}
+      key={username}
+    >
       {currentScreen === 'topics' && (
         <TopicSelection
           onSelectTopic={handleSelectTopic}
+          topics={topics}
+          resources={resourcesByTopic}
           username={username}
           onLogout={handleLogout}
         />
@@ -93,6 +132,7 @@ export default function App() {
       {currentScreen === 'resources' && selectedTopic && (
         <ResourceList
           topic={selectedTopic}
+          resources={resourcesByTopic}
           onBack={handleBackToTopics}
           onStartConversation={handleStartConversation}
         />

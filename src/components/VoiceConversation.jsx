@@ -41,7 +41,7 @@ export default function VoiceConversation({ resource, onExit }) {
         alignItems: 'center',
       }}
     >
-      <div style={{ maxWidth: '480px', width: '100%' }}>
+      <div style={{ maxWidth: '720px', width: '100%' }}>
         <div
           style={{
             borderRadius: '1rem',
@@ -150,16 +150,16 @@ export default function VoiceConversation({ resource, onExit }) {
             style={{
               position: 'relative',
               width: '100%',
-              height: '190px',
+              height: '240px',
               borderRadius: '0.75rem',
               overflow: 'hidden',
-              background: 'linear-gradient(135deg, #1a202c, #2d3748)',
-              backgroundImage: 'url(https://images.unsplash.com/photo-1507525428034-b723cf961dde?q=80&w=1920&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)',
+              backgroundColor: '#111827',
+              backgroundImage: 'url(/navi-card.jpg)', // place the provided image as public/navi-card.jpg
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               display: 'flex',
-              alignItems: 'flex-end',
-              justifyContent: 'flex-start',
+              alignItems: 'center',
+              justifyContent: 'center',
               padding: '0.75rem',
               boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05), 0 4px 10px rgba(0,0,0,0.2)',
             }}
@@ -179,7 +179,7 @@ export default function VoiceConversation({ resource, onExit }) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                backgroundColor: 'rgba(15,23,42,0.7)',
+                backgroundColor: 'rgba(15,23,42,0.75)',
                 borderRadius: '999px',
                 padding: '0.3rem 0.7rem',
                 border: '1px solid rgba(255,255,255,0.1)',

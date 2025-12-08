@@ -1,8 +1,7 @@
 import { useProgress } from '../context/ProgressContext';
-import { topics, resources } from '../data/mockData';
 import { LockIcon, LogoutIcon } from './Icons';
 
-export default function TopicSelection({ onSelectTopic, username, onLogout }) {
+export default function TopicSelection({ onSelectTopic, topics = [], resources = {}, username, onLogout }) {
   const { getTopicProgress } = useProgress();
 
   return (

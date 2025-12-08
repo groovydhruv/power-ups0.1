@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useProgress } from '../context/ProgressContext';
-import { resources } from '../data/mockData';
 import { ChevronDownIcon, ChevronUpIcon, CheckIcon, LockIcon } from './Icons';
 
-export default function ResourceList({ topic, onBack, onStartConversation }) {
+export default function ResourceList({ topic, resources = {}, onBack, onStartConversation }) {
   const { getResourceStatus, isResourceUnlocked, markResourceStarted, markResourceComplete } = useProgress();
   const [expanded, setExpanded] = useState({});
   const topicResources = resources[topic.id] || [];

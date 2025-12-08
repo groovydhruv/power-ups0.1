@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
 const ProgressContext = createContext();
 
@@ -10,22 +11,91 @@ export const useProgress = () => {
   return context;
 };
 
-export const ProgressProvider = ({ children, storageKey = 'learning-platform-progress' }) => {
+const isSupabaseReady = () =>
+  typeof supabase !== 'undefined' &&
+  !!import.meta.env.VITE_SUPABASE_URL &&
+  !!import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+const generateId = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return `user-${Math.random().toString(36).slice(2)}`;
+};
+
+export const ProgressProvider = ({ children, storageKey = 'learning-platform-progress', username }) => {
   const [progress, setProgress] = useState(() => {
     const saved = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null;
     return saved ? JSON.parse(saved) : {};
   });
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     localStorage.setItem(storageKey, JSON.stringify(progress));
   }, [progress, storageKey]);
 
+  // Establish a stable userId per username (stored locally)
+  useEffect(() => {
+    if (!username) return;
+    if (typeof window === 'undefined') return;
+    const key = `navi_user_id_${username}`;
+    const existing = localStorage.getItem(key);
+    const id = existing || generateId();
+    if (!existing) localStorage.setItem(key, id);
+    setUserId(id);
+  }, [username]);
+
+  // Fetch remote progress when userId is ready and Supabase is configured
+  useEffect(() => {
+    const fetchProgress = async () => {
+      if (!isSupabaseReady() || !userId) return;
+      try {
+        // Upsert user profile
+        await supabase.from('users').upsert({ id: userId, username }).select();
+
+        const { data, error } = await supabase
+          .from('user_progress')
+          .select('resource_id, started, completed, conversation_completed')
+          .eq('user_id', userId);
+        if (error) throw error;
+        const merged = {};
+        (data || []).forEach((row) => {
+          merged[row.resource_id] = {
+            started: !!row.started,
+            completed: !!row.completed,
+            conversationCompleted: !!row.conversation_completed,
+          };
+        });
+        setProgress((prev) => ({ ...prev, ...merged }));
+      } catch (err) {
+        console.warn('Supabase fetch progress failed:', err?.message || err);
+      }
+    };
+    fetchProgress();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
+  const syncProgress = async (resourceId, payload) => {
+    if (!isSupabaseReady() || !userId) return;
+    try {
+      await supabase
+        .from('user_progress')
+        .upsert({
+          user_id: userId,
+          resource_id: resourceId,
+          ...payload,
+          updated_at: new Date().toISOString(),
+        });
+    } catch (err) {
+      console.warn('Supabase sync failed:', err?.message || err);
+    }
+  };
+
   const markResourceStarted = (resourceId) => {
     setProgress((prev) => ({
       ...prev,
       [resourceId]: { ...prev[resourceId], started: true, completed: false, conversationCompleted: false },
     }));
+    syncProgress(resourceId, { started: true, completed: false, conversation_completed: false });
   };
 
   const markResourceComplete = (resourceId) => {
@@ -33,6 +103,7 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
       ...prev,
       [resourceId]: { ...prev[resourceId], completed: true },
     }));
+    syncProgress(resourceId, { completed: true });
   };
 
   const markConversationComplete = (resourceId) => {
@@ -40,6 +111,7 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
       ...prev,
       [resourceId]: { ...prev[resourceId], conversationCompleted: true },
     }));
+    syncProgress(resourceId, { conversation_completed: true });
   };
 
   const getResourceStatus = (resourceId) => {
