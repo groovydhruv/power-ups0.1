@@ -1,11 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useProgress } from '../context/ProgressContext';
 import { CloseIcon, MicIcon, MicOffIcon } from './Icons';
+import { LiveKitRoom, RoomAudioRenderer, useLocalParticipant } from '@livekit/components-react';
+import { fetchLivekitToken } from '../lib/livekitClient';
 
 export default function VoiceConversation({ resource, onExit }) {
   const { markConversationComplete } = useProgress();
   const [isMuted, setIsMuted] = useState(false);
   const [elapsed, setElapsed] = useState(0);
+  const [lkToken, setLkToken] = useState('');
+  const [lkUrl, setLkUrl] = useState('');
+  const [connecting, setConnecting] = useState(true);
+  const [connectError, setConnectError] = useState('');
 
   useEffect(() => {
     const start = Date.now();
@@ -26,6 +32,85 @@ export default function VoiceConversation({ resource, onExit }) {
   const handleEndConversation = () => {
     markConversationComplete(resource.id);
     onExit();
+  };
+
+  const roomName = useMemo(() => {
+    // use powerupId if available, else resource id
+    return resource.powerupId ? `powerup-${resource.powerupId}` : resource.id;
+  }, [resource]);
+
+  const identity = useMemo(() => {
+    // basic identity; can be enhanced with username if passed down
+    return `user-${Math.random().toString(36).slice(2)}`;
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadToken = async () => {
+      setConnecting(true);
+      setConnectError('');
+      try {
+        const { token, url } = await fetchLivekitToken({
+          roomName,
+          identity,
+        });
+        if (!isMounted) return;
+        setLkToken(token);
+        setLkUrl(url);
+      } catch (err) {
+        if (!isMounted) return;
+        setConnectError(err?.message || 'Failed to get LiveKit token');
+      } finally {
+        if (isMounted) setConnecting(false);
+      }
+    };
+    loadToken();
+    return () => {
+      isMounted = false;
+    };
+  }, [roomName, identity]);
+
+  const handleMicToggle = () => {
+    setIsMuted((prev) => !prev);
+  };
+
+  function MicController() {
+    const { localParticipant } = useLocalParticipant();
+    useEffect(() => {
+      if (!localParticipant) return;
+      localParticipant.setMicrophoneEnabled(!isMuted);
+    }, [isMuted, localParticipant]);
+    return null;
+  }
+
+  const renderLiveKit = () => {
+    if (connectError) {
+      return (
+        <div style={{ color: '#b91c1c', fontSize: '0.9rem' }}>
+          LiveKit connection failed: {connectError}
+        </div>
+      );
+    }
+    if (connecting || !lkToken || !lkUrl) {
+      return (
+        <div style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+          Connecting to conversation...
+        </div>
+      );
+    }
+    return (
+      <LiveKitRoom
+        serverUrl={lkUrl}
+        token={lkToken}
+        connect={true}
+        audio={true}
+        video={false}
+        style={{ height: 0, width: 0, overflow: 'hidden' }}
+      >
+        <RoomAudioRenderer />
+        <MicController />
+      </LiveKitRoom>
+    );
   };
 
   return (
@@ -197,6 +282,9 @@ export default function VoiceConversation({ resource, onExit }) {
             </div>
           </div>
 
+          {/* LiveKit connection status */}
+          <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>{renderLiveKit()}</div>
+
           {/* Controls */}
           <div
             style={{
@@ -207,7 +295,7 @@ export default function VoiceConversation({ resource, onExit }) {
             }}
           >
             <button
-              onClick={() => setIsMuted(!isMuted)}
+              onClick={handleMicToggle}
               style={{
                 width: '48px',
                 height: '48px',

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { isSupabaseReady } from '../lib/dataApi';
 
 const ProgressContext = createContext();
 
@@ -10,11 +11,6 @@ export const useProgress = () => {
   }
   return context;
 };
-
-const isSupabaseReady = () =>
-  typeof supabase !== 'undefined' &&
-  !!import.meta.env.VITE_SUPABASE_URL &&
-  !!import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 const generateId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
@@ -47,7 +43,7 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
   // Fetch remote progress when userId is ready and Supabase is configured
   useEffect(() => {
     const fetchProgress = async () => {
-      if (!isSupabaseReady() || !userId) return;
+      if (!isSupabaseReady || !supabase || !userId) return;
       try {
         // Upsert user profile
         await supabase.from('users').upsert({ id: userId, username }).select();
@@ -75,7 +71,7 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
   }, [userId]);
 
   const syncProgress = async (resourceId, payload) => {
-    if (!isSupabaseReady() || !userId) return;
+    if (!isSupabaseReady || !supabase || !userId) return;
     try {
       await supabase
         .from('user_progress')

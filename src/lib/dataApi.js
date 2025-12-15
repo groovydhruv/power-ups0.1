@@ -1,72 +1,84 @@
 import { supabase } from './supabaseClient';
 import { topics as fallbackTopics, resources as fallbackResources } from '../data/mockData';
 
-const isSupabaseReady =
+export const isSupabaseReady =
   !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 /**
- * Fetch topics from Supabase. Falls back to local mock data on error.
- * Expected Supabase table: topics(id, title, description, image, position)
+ * Fetch powerups from Supabase powerup_metadata table and map to topic/resource shape.
+ * Falls back to local mock data on error.
  */
 export async function fetchTopics() {
-  if (!isSupabaseReady) return fallbackTopics;
+  if (!isSupabaseReady || !supabase) {
+    console.warn('[dataApi] Supabase not configured, using fallback topics');
+    return fallbackTopics;
+  }
   try {
     const { data, error } = await supabase
-      .from('topics')
-      .select('id, title, description, image, position')
-      .order('position', { ascending: true });
+      .from('powerup_metadata')
+      .select('id, title, theme, context, url, key_topics, transcript, created_at')
+      .order('created_at', { ascending: true });
     if (error) throw error;
-    if (!data) return fallbackTopics;
-    return data.map((t) => ({
-      id: t.id,
-      title: t.title,
-      description: t.description,
-      image: t.image,
-      unlocked: false, // unlock logic handled in TopicSelection
-      position: t.position ?? 0,
+    if (!data || data.length === 0) {
+      console.warn('[dataApi] powerup_metadata empty, using fallback topics');
+      return fallbackTopics;
+    }
+    console.info('[dataApi] Loaded powerups from Supabase:', data.length);
+    return data.map((p) => ({
+      id: `powerup-${p.id}`,
+      title: p.title || 'Power-Up',
+      description: p.theme || 'Power-Up content',
+      image:
+        'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=800&h=600&fit=crop&q=80',
+      unlocked: false,
+      position: p.id ?? 0,
+      powerupId: p.id,
+      keyTopics: p.key_topics || [],
+      context: p.context || '',
+      transcript: p.transcript || '',
+      url: p.url || '',
     }));
   } catch (err) {
-    console.warn('Supabase fetchTopics failed, using fallback:', err?.message || err);
+    console.warn('Supabase fetchTopics (powerup_metadata) failed, using fallback:', err?.message || err);
     return fallbackTopics;
   }
 }
 
-/**
- * Fetch resources from Supabase. Falls back to local mock data on error.
- * Expected Supabase table: resources(id, topic_id, title, type, duration, description, order_in_topic, thumbnail, link)
- * Returns an object keyed by topicId => array of resources.
- */
 export async function fetchResourcesByTopic() {
-  if (!isSupabaseReady) return fallbackResources;
+  if (!isSupabaseReady || !supabase) {
+    console.warn('[dataApi] Supabase not configured, using fallback resources');
+    return fallbackResources;
+  }
   try {
     const { data, error } = await supabase
-      .from('resources')
-      .select(
-        'id, topic_id, title, type, duration, description, order_in_topic, thumbnail, link'
-      );
+      .from('powerup_metadata')
+      .select('id, title, theme, context, url, key_topics, transcript, created_at');
     if (error) throw error;
-    if (!data) return fallbackResources;
+    if (!data || data.length === 0) {
+      console.warn('[dataApi] powerup_metadata empty, using fallback resources');
+      return fallbackResources;
+    }
 
     const grouped = {};
-    data.forEach((r) => {
-      if (!grouped[r.topic_id]) grouped[r.topic_id] = [];
-      grouped[r.topic_id].push({
-        id: r.id,
-        title: r.title,
-        type: r.type,
-        duration: r.duration,
-        description: r.description,
-        order: r.order_in_topic ?? 0,
-        thumbnail: r.thumbnail,
-        link: r.link,
-      });
+    data.forEach((p) => {
+      const topicId = `powerup-${p.id}`;
+      grouped[topicId] = [
+        {
+          id: `powerup-resource-${p.id}`,
+          title: p.title || 'Power-Up Resource',
+          type: 'video',
+          duration: '',
+          description: p.context || p.theme || 'Power-Up content',
+          order: 1,
+          thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=450&fit=crop&q=80',
+          link: p.url || '',
+          powerupId: p.id,
+          keyTopics: p.key_topics || [],
+        },
+      ];
     });
 
-    // Ensure each topic’s resources are sorted by order
-    Object.keys(grouped).forEach((k) => {
-      grouped[k] = grouped[k].sort((a, b) => a.order - b.order);
-    });
-
+    console.info('[dataApi] Loaded resources from powerup_metadata:', data.length);
     return grouped;
   } catch (err) {
     console.warn('Supabase fetchResources failed, using fallback:', err?.message || err);
