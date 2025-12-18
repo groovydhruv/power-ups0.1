@@ -1,35 +1,35 @@
 /**
- * Fetch a LiveKit user token from the backend.
- * Expects env VITE_LIVEKIT_TOKEN_URL pointing to /generate-user-token
+ * STUB IMPLEMENTATION - LiveKit Client for React Native
+ * 
+ * TODO FOR DEVELOPERS:
+ * 1. Install LiveKit: npm install @livekit/react-native @livekit/react-native-webrtc
+ * 2. Set up your LiveKit server URL and API key/secret
+ * 3. Create a backend endpoint to generate LiveKit tokens
+ * 4. Replace the mock function below with actual API call
+ * 
+ * Example real implementation:
+ * 
+ * export async function fetchLivekitToken({ roomName, identity }) {
+ *   const response = await fetch('https://your-backend.com/api/livekit-token', {
+ *     method: 'POST',
+ *     headers: { 'Content-Type': 'application/json' },
+ *     body: JSON.stringify({ roomName, identity }),
+ *   });
+ *   const data = await response.json();
+ *   return { token: data.token, url: data.url };
+ * }
+ * 
+ * For now, this returns a rejected promise to simulate connection unavailable.
  */
+
+// Mock implementation for prototype
 export async function fetchLivekitToken({ roomName, identity }) {
-  const endpoint = import.meta.env.VITE_LIVEKIT_TOKEN_URL;
-  if (!endpoint) {
-    throw new Error('VITE_LIVEKIT_TOKEN_URL is not set');
-  }
-
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      user_identity: identity,
-      room_name: roomName,
-    }),
-  });
-
-  if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(`Token request failed (${res.status}): ${msg}`);
-  }
-
-  const json = await res.json();
-  if (!json.token || !json.url) {
-    throw new Error('Token response missing token or url');
-  }
-
-  return json; // { token, url }
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // Return mock error - developers will replace this
+  throw new Error('LiveKit not configured. This is a UI prototype - integrate LiveKit for voice functionality.');
 }
 
-
+// Mock room connection status
+export const LIVEKIT_CONFIGURED = false;

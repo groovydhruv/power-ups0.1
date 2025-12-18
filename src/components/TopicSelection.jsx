@@ -1,209 +1,281 @@
+import React from 'react';
+import { 
+  View, 
+  Text, 
+  ScrollView, 
+  TouchableOpacity, 
+  StyleSheet,
+  Dimensions,
+  ImageBackground,
+  SafeAreaView 
+} from 'react-native';
 import { useProgress } from '../context/ProgressContext';
 import { LockIcon, LogoutIcon } from './Icons';
+import { colors, spacing, borderRadius, fontSize } from '../styles/theme';
+
+const { width } = Dimensions.get('window');
+const isTablet = width > 600;
+const cardWidth = isTablet ? (width - spacing.xxxl * 2 - spacing.xl) / 2 : width - spacing.xl * 2;
 
 export default function TopicSelection({ onSelectTopic, topics = [], resources = {}, username, onLogout }) {
-  const { getTopicProgress } = useProgress();
+  const { getTopicProgress, points } = useProgress();
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: '#f5f3f0',
-        padding: '2.5rem 2rem',
-        color: '#111827',
-        fontFamily: "'Fustat', 'Inter', -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      }}
-    >
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <div
-          style={{
-            marginBottom: '3rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: '1.5rem',
-          }}
-        >
-          <div>
-            <h1
-              style={{
-                fontSize: '2.5rem',
-                fontWeight: 600,
-                color: '#111827',
-                letterSpacing: '-0.03em',
-                marginBottom: '0.4rem',
-              }}
-            >
-              Power-Ups
-            </h1>
-            <p style={{ fontSize: '1rem', color: '#6b7280', fontWeight: '400', maxWidth: '520px' }}>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerText}>
+            <Text style={styles.title}>Power-Ups</Text>
+            <Text style={styles.subtitle}>
               Consume each resource thoroughly. Validate your insights and knowledge with a
-              conversation. That&apos;s the only way to progress.
-            </p>
-          </div>
+              conversation. That's the only way to progress.
+            </Text>
+          </View>
 
           {username && (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                fontSize: '0.85rem',
-                color: '#6b7280',
-              }}
-            >
-              <span>
-                Signed in as <span style={{ color: '#111827' }}>{username}</span>
-              </span>
-              <button
-                onClick={onLogout}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '0.35rem 0.55rem',
-                  borderRadius: '999px',
-                  border: '1px solid rgba(148,163,184,0.6)',
-                  background: '#f9fafb',
-                  cursor: 'pointer',
-                }}
-                aria-label="Log out"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#e5e7eb';
-                  e.currentTarget.style.borderColor = 'rgba(148,163,184,0.9)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f9fafb';
-                  e.currentTarget.style.borderColor = 'rgba(148,163,184,0.6)';
-                }}
+            <View style={styles.userInfo}>
+              <View style={styles.userInfoLeft}>
+                <Text style={styles.userInfoText}>
+                  Signed in as <Text style={styles.username}>{username}</Text>
+                </Text>
+                <View style={styles.pointsBadge}>
+                  <Text style={styles.pointsEmoji}>⭐</Text>
+                  <Text style={styles.pointsText}>{points}</Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                onPress={onLogout}
+                style={styles.logoutButton}
+                activeOpacity={0.7}
+                accessible
+                accessibilityLabel="Log out"
+                accessibilityRole="button"
               >
-                <LogoutIcon color="#111827" />
-              </button>
-            </div>
+                <LogoutIcon color={colors.textPrimary} />
+              </TouchableOpacity>
+            </View>
           )}
-        </div>
+        </View>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+        {/* Topics Grid */}
+        <View style={styles.grid}>
           {topics.map((topic, index) => {
             const topicResources = resources[topic.id] || [];
             const progress = getTopicProgress(topic.id, topicResources);
             let isLocked = false;
 
             if (index === 0) {
-              // First topic is always unlocked
               isLocked = false;
             } else {
               const prevTopic = topics[index - 1];
               const prevResources = resources[prevTopic.id] || [];
               const prevProgress = getTopicProgress(prevTopic.id, prevResources);
-              // Unlock this topic only when previous topic is 100% complete
               isLocked = prevProgress < 100;
             }
 
             return (
-              <div
+              <TouchableOpacity
                 key={topic.id}
-                style={{
-                  height: '400px',
-                  borderRadius: '0.75rem',
-                  border: '1px solid rgba(15,23,42,0.08)',
-                  transition: 'all 0.2s',
-                  backgroundColor: isLocked ? '#f3f4f6' : '#ffffff',
-                  opacity: isLocked ? 0.7 : 1,
-                  cursor: isLocked ? 'not-allowed' : 'pointer',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isLocked) {
-                    e.currentTarget.style.borderColor = 'rgba(15,23,42,0.16)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isLocked) {
-                    e.currentTarget.style.borderColor = 'rgba(15,23,42,0.08)';
-                  }
-                }}
-                onClick={() => !isLocked && onSelectTopic(topic)}
+                style={[
+                  styles.card,
+                  isLocked && styles.cardLocked,
+                  { width: cardWidth }
+                ]}
+                onPress={() => !isLocked && onSelectTopic(topic)}
+                disabled={isLocked}
+                activeOpacity={0.7}
               >
-                <div
-                  style={{
-                    height: '40%',
-                    backgroundImage: `url(${topic.image})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    position: 'relative',
-                  }}
+                <ImageBackground
+                  source={{ uri: topic.image }}
+                  style={styles.cardImage}
+                  resizeMode="cover"
                 >
                   {isLocked && (
-                    <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+                    <View style={styles.lockIcon}>
                       <LockIcon color="#999999" />
-                    </div>
+                    </View>
                   )}
-                </div>
-                <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <div>
-                    <h2
-                      style={{
-                        fontSize: '1.25rem',
-                        fontWeight: '600',
-                        color: '#111827',
-                        marginBottom: '0.5rem',
-                        letterSpacing: '-0.01em',
-                      }}
-                    >
-                      {topic.title}
-                    </h2>
-                    <p
-                      style={{
-                        fontSize: '0.875rem',
-                        color: '#6b7280',
-                        marginBottom: '1rem',
-                        lineHeight: '1.6',
-                      }}
-                    >
-                      {topic.description}
-                    </p>
-                  </div>
+                </ImageBackground>
+
+                <View style={styles.cardContent}>
+                  <View style={styles.cardInfo}>
+                    <Text style={styles.cardTitle}>{topic.title}</Text>
+                    <Text style={styles.cardDescription}>{topic.description}</Text>
+                  </View>
+
                   {!isLocked && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <div
-                        style={{
-                          flex: 1,
-                          height: '2px',
-                          backgroundColor: '#e5e7eb',
-                          borderRadius: '9999px',
-                          overflow: 'hidden',
-                        }}
-                      >
-                        <div
-                          style={{
-                            height: '100%',
-                            backgroundColor: '#111827',
-                            transition: 'width 0.3s',
-                            width: `${progress}%`,
-                          }}
-                        />
-                      </div>
-                      <span
-                        style={{
-                          fontSize: '0.75rem',
-                          color: '#6b7280',
-                          minWidth: '40px',
-                          textAlign: 'right',
-                        }}
-                      >
-                        {progress}%
-                      </span>
-                    </div>
+                    <View style={styles.progressContainer}>
+                      <View style={styles.progressBar}>
+                        <View style={[styles.progressFill, { width: `${progress}%` }]} />
+                      </View>
+                      <Text style={styles.progressText}>{progress}%</Text>
+                    </View>
                   )}
-                </div>
-              </div>
+                </View>
+              </TouchableOpacity>
             );
           })}
-        </div>
-      </div>
-    </div>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: spacing.xl,
+    paddingTop: spacing.lg,
+    flexGrow: 1,
+  },
+  header: {
+    marginBottom: spacing.xl,
+  },
+  headerText: {
+    marginBottom: spacing.lg,
+  },
+  title: {
+    fontSize: width > 600 ? fontSize.xxxl + 8 : fontSize.xxl + 4,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    letterSpacing: -0.5,
+    marginBottom: spacing.xs,
+  },
+  subtitle: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    lineHeight: fontSize.sm * 1.5,
+  },
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  userInfoLeft: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: spacing.xs,
+    flex: 1,
+  },
+  userInfoText: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+  },
+  username: {
+    color: colors.textPrimary,
+  },
+  pointsBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.cardBackground,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  pointsEmoji: {
+    fontSize: fontSize.md,
+  },
+  pointsText: {
+    fontSize: fontSize.sm,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    fontVariant: ['tabular-nums'],
+  },
+  logoutButton: {
+    padding: spacing.sm,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.buttonBorder,
+    backgroundColor: colors.buttonBackground,
+    minWidth: 44,
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  grid: {
+    flexDirection: 'column',
+    gap: spacing.lg,
+  },
+  card: {
+    height: width > 600 ? 400 : 320,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.cardBackground,
+    overflow: 'hidden',
+    marginBottom: spacing.md,
+  },
+  cardLocked: {
+    backgroundColor: colors.cardBackgroundLocked,
+    opacity: 0.7,
+  },
+  cardImage: {
+    height: '40%',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+  },
+  lockIcon: {
+    margin: spacing.lg,
+  },
+  cardContent: {
+    flex: 1,
+    padding: width > 600 ? spacing.xl : spacing.lg,
+    justifyContent: 'space-between',
+  },
+  cardInfo: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: width > 600 ? fontSize.xl : fontSize.lg,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    letterSpacing: -0.3,
+    marginBottom: spacing.xs,
+  },
+  cardDescription: {
+    fontSize: width > 600 ? fontSize.sm : fontSize.sm - 1,
+    color: colors.textSecondary,
+    lineHeight: fontSize.sm * 1.5,
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  progressBar: {
+    flex: 1,
+    height: 2,
+    backgroundColor: colors.progressBar,
+    borderRadius: borderRadius.full,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: colors.progressFill,
+  },
+  progressText: {
+    fontSize: fontSize.xs,
+    color: colors.textSecondary,
+    minWidth: 40,
+    textAlign: 'right',
+  },
+});

@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Learning Platform",
+    "slug": "project-dashboard-ui",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.projectdashboard"
+    },
+    "android": {
+      "package": "com.yourcompany.projectdashboard"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

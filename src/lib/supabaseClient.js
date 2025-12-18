@@ -1,29 +1,28 @@
-import { createClient } from '@supabase/supabase-js';
+/**
+ * STUB IMPLEMENTATION - Supabase Client for React Native
+ * 
+ * TODO FOR DEVELOPERS:
+ * 1. Install Supabase: npm install @supabase/supabase-js
+ * 2. Create a .env file with:
+ *    - SUPABASE_URL=your_supabase_url
+ *    - SUPABASE_ANON_KEY=your_anon_key
+ * 3. Install react-native-dotenv for environment variables
+ * 4. Import and initialize the real Supabase client below
+ * 
+ * Example real implementation:
+ * 
+ * import { createClient } from '@supabase/supabase-js';
+ * import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@env';
+ * 
+ * export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+ * 
+ * For now, this exports null to allow the app to run with mock data.
+ */
 
-// Ensure these env vars are set in a local .env.local:
-// VITE_SUPABASE_URL=https://suhleitwhhjajdiskvbd.supabase.co
-// VITE_SUPABASE_ANON_KEY=...
-const rawUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Mock client for prototype
+export const supabase = null;
 
-// Normalize URL to include protocol
-const supabaseUrl =
-  rawUrl && rawUrl.startsWith('http')
-    ? rawUrl
-    : rawUrl
-    ? `https://${rawUrl}`
-    : undefined;
-
-let supabase = null;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    'Supabase env vars are missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local'
-  );
-} else {
-  supabase = createClient(supabaseUrl, supabaseAnonKey);
-  console.info('[supabaseClient] Initialized with URL:', supabaseUrl);
-}
-
-export { supabase };
-
+// Helper to check if Supabase is ready
+export const isSupabaseReady = () => {
+  return supabase !== null;
+};

@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabaseClient';
 import { isSupabaseReady } from '../lib/dataApi';
 
@@ -13,37 +14,94 @@ export const useProgress = () => {
 };
 
 const generateId = () => {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
-  return `user-${Math.random().toString(36).slice(2)}`;
+  // React Native compatible UUID generation
+  return `user-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 };
 
 export const ProgressProvider = ({ children, storageKey = 'learning-platform-progress', username }) => {
-  const [progress, setProgress] = useState(() => {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null;
-    return saved ? JSON.parse(saved) : {};
-  });
+  const [progress, setProgress] = useState({});
+  const [points, setPoints] = useState(0);
   const [userId, setUserId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Load progress and points from AsyncStorage on mount
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem(storageKey, JSON.stringify(progress));
-  }, [progress, storageKey]);
+    const loadProgress = async () => {
+      try {
+        const saved = await AsyncStorage.getItem(storageKey);
+        if (saved) {
+          setProgress(JSON.parse(saved));
+        }
+        const savedPoints = await AsyncStorage.getItem(`${storageKey}-points`);
+        if (savedPoints) {
+          setPoints(parseInt(savedPoints, 10));
+        }
+      } catch (error) {
+        console.warn('Failed to load progress from AsyncStorage:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadProgress();
+  }, [storageKey]);
 
-  // Establish a stable userId per username (stored locally)
+  // Save progress to AsyncStorage whenever it changes
+  useEffect(() => {
+    if (isLoading) return; // Don't save during initial load
+    
+    const saveProgress = async () => {
+      try {
+        await AsyncStorage.setItem(storageKey, JSON.stringify(progress));
+      } catch (error) {
+        console.warn('Failed to save progress to AsyncStorage:', error);
+      }
+    };
+    saveProgress();
+  }, [progress, storageKey, isLoading]);
+
+  // Save points to AsyncStorage whenever they change
+  useEffect(() => {
+    if (isLoading) return; // Don't save during initial load
+    
+    const savePoints = async () => {
+      try {
+        await AsyncStorage.setItem(`${storageKey}-points`, points.toString());
+      } catch (error) {
+        console.warn('Failed to save points to AsyncStorage:', error);
+      }
+    };
+    savePoints();
+  }, [points, storageKey, isLoading]);
+
+  // Establish a stable userId per username (stored in AsyncStorage)
   useEffect(() => {
     if (!username) return;
-    if (typeof window === 'undefined') return;
-    const key = `navi_user_id_${username}`;
-    const existing = localStorage.getItem(key);
-    const id = existing || generateId();
-    if (!existing) localStorage.setItem(key, id);
-    setUserId(id);
+    
+    const loadOrCreateUserId = async () => {
+      try {
+        const key = `navi_user_id_${username}`;
+        const existing = await AsyncStorage.getItem(key);
+        const id = existing || generateId();
+        if (!existing) {
+          await AsyncStorage.setItem(key, id);
+        }
+        setUserId(id);
+      } catch (error) {
+        console.warn('Failed to load/create user ID:', error);
+        // Fallback to temporary ID
+        setUserId(generateId());
+      }
+    };
+    
+    loadOrCreateUserId();
   }, [username]);
 
   // Fetch remote progress when userId is ready and Supabase is configured
+  // Note: In prototype mode, Supabase is stubbed, so this won't run
   useEffect(() => {
     const fetchProgress = async () => {
       if (!isSupabaseReady || !supabase || !userId) return;
+      
       try {
         // Upsert user profile
         await supabase.from('users').upsert({ id: userId, username }).select();
@@ -52,7 +110,9 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
           .from('user_progress')
           .select('resource_id, started, completed, conversation_completed')
           .eq('user_id', userId);
+          
         if (error) throw error;
+        
         const merged = {};
         (data || []).forEach((row) => {
           merged[row.resource_id] = {
@@ -66,12 +126,13 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
         console.warn('Supabase fetch progress failed:', err?.message || err);
       }
     };
+    
     fetchProgress();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+  }, [userId, username]);
 
   const syncProgress = async (resourceId, payload) => {
     if (!isSupabaseReady || !supabase || !userId) return;
+    
     try {
       await supabase
         .from('user_progress')
@@ -89,7 +150,13 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
   const markResourceStarted = (resourceId) => {
     setProgress((prev) => ({
       ...prev,
-      [resourceId]: { ...prev[resourceId], started: true, completed: false, conversationCompleted: false },
+      [resourceId]: { 
+        ...prev[resourceId], 
+        started: true, 
+        completed: false, 
+        conversationCompleted: false,
+        conversationInProgress: false
+      },
     }));
     syncProgress(resourceId, { started: true, completed: false, conversation_completed: false });
   };
@@ -102,16 +169,40 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
     syncProgress(resourceId, { completed: true });
   };
 
+  const markConversationStarted = (resourceId) => {
+    setProgress((prev) => ({
+      ...prev,
+      [resourceId]: { 
+        ...prev[resourceId], 
+        completed: true,
+        conversationInProgress: true,
+        conversationCompleted: false
+      },
+    }));
+    syncProgress(resourceId, { completed: true, conversation_completed: false });
+  };
+
   const markConversationComplete = (resourceId) => {
     setProgress((prev) => ({
       ...prev,
-      [resourceId]: { ...prev[resourceId], conversationCompleted: true },
+      [resourceId]: { 
+        ...prev[resourceId], 
+        conversationInProgress: false,
+        conversationCompleted: true 
+      },
     }));
+    // Award 100 points for completing conversation
+    setPoints((prev) => prev + 100);
     syncProgress(resourceId, { conversation_completed: true });
   };
 
   const getResourceStatus = (resourceId) => {
-    return progress[resourceId] || { started: false, completed: false, conversationCompleted: false };
+    return progress[resourceId] || { 
+      started: false, 
+      completed: false, 
+      conversationInProgress: false,
+      conversationCompleted: false 
+    };
   };
 
   const isResourceUnlocked = (topicId, resourceOrder, resources) => {
@@ -122,8 +213,8 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
     if (!prevResource) return true;
 
     const status = getResourceStatus(prevResource.id);
-    // Unlock when the previous resource has been marked complete
-    return status.completed;
+    // Unlock when the previous resource has been marked complete AND conversation is completed
+    return status.completed && status.conversationCompleted;
   };
 
   const getTopicProgress = (topicId, resources) => {
@@ -139,8 +230,10 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
     <ProgressContext.Provider
       value={{
         progress,
+        points,
         markResourceStarted,
         markResourceComplete,
+        markConversationStarted,
         markConversationComplete,
         getResourceStatus,
         isResourceUnlocked,
