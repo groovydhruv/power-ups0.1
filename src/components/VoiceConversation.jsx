@@ -59,7 +59,7 @@ const mockMessages = [
   },
 ];
 
-export default function VoiceConversation({ resource, onExit }) {
+export default function VoiceConversation({ resource, topics = [], resources = {}, onExit }) {
   const { markConversationStarted, markConversationComplete } = useProgress();
   const [messages, setMessages] = useState(mockMessages);
   const [playingId, setPlayingId] = useState(null);
@@ -168,7 +168,7 @@ export default function VoiceConversation({ resource, onExit }) {
   };
 
   const handleEndConversation = () => {
-    markConversationComplete(resource.id);
+    markConversationComplete(resource.id, topics, resources);
     onExit();
   };
 
@@ -357,28 +357,30 @@ const styles = StyleSheet.create({
   header: {
     padding: isMobile ? spacing.lg : spacing.xl,
     paddingTop: isMobile ? spacing.md : spacing.lg,
-    paddingBottom: isMobile ? spacing.md : spacing.lg,
+    paddingBottom: isMobile ? spacing.lg : spacing.xl,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     backgroundColor: colors.cardBackground,
   },
   backButton: {
     alignSelf: 'flex-start',
-    padding: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.sm,
-    minHeight: 44,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md,
+    minHeight: 48,
     justifyContent: 'center',
-    marginBottom: spacing.xs,
+    marginBottom: spacing.sm,
+    backgroundColor: colors.buttonBackground,
   },
   backButtonText: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
+    fontSize: isMobile ? fontSize.md : fontSize.lg,
+    color: colors.textPrimary,
+    fontWeight: '600',
   },
   headerSubtitle: {
-    fontSize: isMobile ? fontSize.xs : fontSize.sm,
+    fontSize: isMobile ? fontSize.sm : fontSize.md,
     color: colors.textSecondary,
-    lineHeight: fontSize.sm * 1.3,
+    lineHeight: isMobile ? fontSize.sm * 1.5 : fontSize.md * 1.5,
   },
   card: {
     flex: 1,
@@ -388,23 +390,28 @@ const styles = StyleSheet.create({
   topicInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    marginBottom: spacing.lg,
+    gap: isMobile ? spacing.md : spacing.lg,
+    marginBottom: isMobile ? spacing.lg : spacing.xl,
+    paddingBottom: isMobile ? spacing.lg : spacing.xl,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   naviAvatar: {
-    width: isMobile ? 48 : 56,
-    height: isMobile ? 48 : 56,
-    borderRadius: isMobile ? 24 : 28,
+    width: isMobile ? 56 : 64,
+    height: isMobile ? 56 : 64,
+    borderRadius: isMobile ? 28 : 32,
     backgroundColor: colors.cardBackgroundSecondary,
+    borderWidth: 2,
+    borderColor: colors.border,
   },
   titleContainer: {
     flex: 1,
   },
   topicTitle: {
-    fontSize: isMobile ? fontSize.lg : fontSize.xl,
-    fontWeight: '600',
+    fontSize: isMobile ? fontSize.xl : fontSize.xxl,
+    fontWeight: '700',
     color: colors.textPrimary,
-    letterSpacing: -0.3,
+    letterSpacing: -0.5,
   },
   understandingSection: {
     marginBottom: spacing.lg,
@@ -601,37 +608,50 @@ const styles = StyleSheet.create({
   recordingControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: isMobile ? spacing.lg : spacing.xl,
   },
   recordButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: isMobile ? 68 : 72,
+    height: isMobile ? 68 : 72,
+    borderRadius: isMobile ? 34 : 36,
     backgroundColor: colors.cardBackgroundSecondary,
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   recordButtonActive: {
     backgroundColor: colors.error,
     borderColor: colors.error,
+    shadowColor: colors.error,
+    shadowOpacity: 0.3,
   },
   endButton: {
     flex: 1,
-    paddingVertical: spacing.md + 2,
-    paddingHorizontal: spacing.lg,
+    paddingVertical: isMobile ? spacing.lg : spacing.lg + 2,
+    paddingHorizontal: spacing.xl,
     borderRadius: borderRadius.full,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.primary,
     backgroundColor: colors.primary,
-    minHeight: 56,
+    minHeight: isMobile ? 56 : 60,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   endButtonText: {
-    fontSize: fontSize.sm + 1,
+    fontSize: isMobile ? fontSize.md : fontSize.lg,
     color: colors.primaryLight,
-    fontWeight: '500',
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
 });

@@ -20,11 +20,14 @@ const generateId = () => {
 
 export const ProgressProvider = ({ children, storageKey = 'learning-platform-progress', username }) => {
   const [progress, setProgress] = useState({});
-  const [points, setPoints] = useState(0);
+  const [xp, setXp] = useState(0);
+  const [level, setLevel] = useState(1);
+  const [streak, setStreak] = useState(0);
+  const [lastActiveDate, setLastActiveDate] = useState(null);
   const [userId, setUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load progress and points from AsyncStorage on mount
+  // Load progress, xp, level, and streak from AsyncStorage on mount
   useEffect(() => {
     const loadProgress = async () => {
       try {
@@ -32,9 +35,21 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
         if (saved) {
           setProgress(JSON.parse(saved));
         }
-        const savedPoints = await AsyncStorage.getItem(`${storageKey}-points`);
-        if (savedPoints) {
-          setPoints(parseInt(savedPoints, 10));
+        const savedXp = await AsyncStorage.getItem(`${storageKey}-xp`);
+        if (savedXp) {
+          setXp(parseInt(savedXp, 10));
+        }
+        const savedLevel = await AsyncStorage.getItem(`${storageKey}-level`);
+        if (savedLevel) {
+          setLevel(parseInt(savedLevel, 10));
+        }
+        const savedStreak = await AsyncStorage.getItem(`${storageKey}-streak`);
+        const savedLastActive = await AsyncStorage.getItem(`${storageKey}-lastActive`);
+        if (savedStreak) {
+          setStreak(parseInt(savedStreak, 10));
+        }
+        if (savedLastActive) {
+          setLastActiveDate(savedLastActive);
         }
       } catch (error) {
         console.warn('Failed to load progress from AsyncStorage:', error);
@@ -59,19 +74,50 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
     saveProgress();
   }, [progress, storageKey, isLoading]);
 
-  // Save points to AsyncStorage whenever they change
+  // Save xp to AsyncStorage whenever it changes
   useEffect(() => {
     if (isLoading) return; // Don't save during initial load
     
-    const savePoints = async () => {
+    const saveXp = async () => {
       try {
-        await AsyncStorage.setItem(`${storageKey}-points`, points.toString());
+        await AsyncStorage.setItem(`${storageKey}-xp`, xp.toString());
       } catch (error) {
-        console.warn('Failed to save points to AsyncStorage:', error);
+        console.warn('Failed to save xp to AsyncStorage:', error);
       }
     };
-    savePoints();
-  }, [points, storageKey, isLoading]);
+    saveXp();
+  }, [xp, storageKey, isLoading]);
+
+  // Save level to AsyncStorage whenever it changes
+  useEffect(() => {
+    if (isLoading) return; // Don't save during initial load
+    
+    const saveLevel = async () => {
+      try {
+        await AsyncStorage.setItem(`${storageKey}-level`, level.toString());
+      } catch (error) {
+        console.warn('Failed to save level to AsyncStorage:', error);
+      }
+    };
+    saveLevel();
+  }, [level, storageKey, isLoading]);
+
+  // Save streak to AsyncStorage whenever it changes
+  useEffect(() => {
+    if (isLoading) return; // Don't save during initial load
+    
+    const saveStreak = async () => {
+      try {
+        await AsyncStorage.setItem(`${storageKey}-streak`, streak.toString());
+        if (lastActiveDate) {
+          await AsyncStorage.setItem(`${storageKey}-lastActive`, lastActiveDate);
+        }
+      } catch (error) {
+        console.warn('Failed to save streak to AsyncStorage:', error);
+      }
+    };
+    saveStreak();
+  }, [streak, lastActiveDate, storageKey, isLoading]);
 
   // Establish a stable userId per username (stored in AsyncStorage)
   useEffect(() => {
@@ -182,7 +228,7 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
     syncProgress(resourceId, { completed: true, conversation_completed: false });
   };
 
-  const markConversationComplete = (resourceId) => {
+  const markConversationComplete = (resourceId, topics = [], resources = {}) => {
     setProgress((prev) => ({
       ...prev,
       [resourceId]: { 
@@ -191,8 +237,39 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
         conversationCompleted: true 
       },
     }));
-    // Award 100 points for completing conversation
-    setPoints((prev) => prev + 100);
+    // Award 100 XP for completing conversation
+    setXp((prev) => prev + 100);
+    
+    // Calculate level based on completed topics
+    // Level up when a full topic is completed
+    if (topics && resources) {
+      const completedTopics = topics.filter((topic) => {
+        const topicResources = resources[topic.id] || [];
+        return topicResources.every((r) => {
+          const status = progress[r.id] || {};
+          // Include the resource we're currently completing
+          if (r.id === resourceId) return true;
+          return status.conversationCompleted;
+        });
+      });
+      const newLevel = completedTopics.length + 1;
+      setLevel(newLevel);
+    }
+    
+    // Update streak
+    const today = new Date().toDateString();
+    const lastDate = lastActiveDate ? new Date(lastActiveDate).toDateString() : null;
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    
+    if (lastDate === yesterday) {
+      setStreak((prev) => prev + 1); // Continue streak
+    } else if (lastDate !== today) {
+      setStreak(1); // Start new streak or reset to 1 for today
+    }
+    // If lastDate === today, streak stays the same (already counted today)
+    
+    setLastActiveDate(new Date().toISOString());
+    
     syncProgress(resourceId, { conversation_completed: true });
   };
 
@@ -230,7 +307,9 @@ export const ProgressProvider = ({ children, storageKey = 'learning-platform-pro
     <ProgressContext.Provider
       value={{
         progress,
-        points,
+        xp,
+        level,
+        streak,
         markResourceStarted,
         markResourceComplete,
         markConversationStarted,

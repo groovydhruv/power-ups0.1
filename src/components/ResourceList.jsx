@@ -23,6 +23,13 @@ export default function ResourceList({ topic, resources = {}, onBack, onStartCon
   const topicResources = resources[topic.id] || [];
   const sortedResources = [...topicResources].sort((a, b) => a.order - b.order);
 
+  // Find the first incomplete resource (the "next" one to consume)
+  const nextResourceId = sortedResources.find((resource) => {
+    const status = getResourceStatus(resource.id);
+    const unlocked = isResourceUnlocked(topic.id, resource.order, sortedResources);
+    return unlocked && !(status.completed && status.conversationCompleted);
+  })?.id;
+
   const toggleExpand = (resourceId) => {
     setExpanded((prev) => ({ ...prev, [resourceId]: !prev[resourceId] }));
   };
@@ -62,12 +69,14 @@ export default function ResourceList({ topic, resources = {}, onBack, onStartCon
             const isExpanded = expanded[resource.id];
     const isCompleted = status.completed && status.conversationCompleted;
     const isInProgress = status.conversationInProgress;
+    const isNextResource = resource.id === nextResourceId;
 
             return (
       <View style={[
         styles.resourceCard, 
         !unlocked && styles.resourceCardLocked,
-        isInProgress && styles.resourceCardInProgress
+        isInProgress && styles.resourceCardInProgress,
+        isNextResource && styles.resourceCardNext
       ]}>
         <TouchableOpacity
           style={styles.resourceHeader}
@@ -79,38 +88,34 @@ export default function ResourceList({ topic, resources = {}, onBack, onStartCon
             <View style={styles.resourceTitleRow}>
               <Text style={styles.resourceIndex}>{index + 1}</Text>
               <Text style={styles.resourceTitle} numberOfLines={isMobile ? 2 : 1}>
-                {resource.title}
+                          {resource.title}
               </Text>
-              {isCompleted && <CheckIcon color={colors.success} boxSize={12} />}
               {!unlocked && <LockIcon color={colors.textTertiary} />}
             </View>
             <Text style={styles.resourceMeta}>
-              {resource.type} · {resource.duration}
+                        {resource.type} · {resource.duration}
               {isInProgress && <Text style={styles.inProgressBadge}> · In Progress</Text>}
             </Text>
           </View>
 
-          {unlocked && (
+                  {unlocked && !isCompleted && (
             <View style={styles.resourceActions}>
               <TouchableOpacity
                 onPress={(e) => {
-                  e.stopPropagation();
-                  handleAction(resource);
-                }}
-                disabled={isCompleted}
+                          e.stopPropagation();
+                          handleAction(resource);
+                        }}
                 style={[
                   styles.actionButton,
-                  isCompleted && styles.actionButtonDisabled,
                   isInProgress && styles.actionButtonInProgress
                 ]}
                 activeOpacity={0.7}
               >
                 <Text style={[
                   styles.actionButtonText,
-                  isCompleted && styles.actionButtonTextDisabled,
                   isInProgress && styles.actionButtonTextInProgress
                 ]} numberOfLines={1}>
-                  {getButtonText(resource)}
+                        {getButtonText(resource)}
                 </Text>
               </TouchableOpacity>
               {!isMobile && (isExpanded ? (
@@ -118,6 +123,12 @@ export default function ResourceList({ topic, resources = {}, onBack, onStartCon
               ) : (
                 <ChevronDownIcon boxSize={20} color={colors.textTertiary} />
               ))}
+            </View>
+          )}
+
+          {unlocked && isCompleted && (
+            <View style={styles.completedIconContainer}>
+              <CheckIcon color={colors.success} boxSize={isMobile ? 32 : 40} />
             </View>
           )}
         </TouchableOpacity>
@@ -188,49 +199,60 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    padding: isMobile ? spacing.xl : spacing.xxxl,
-    paddingBottom: spacing.lg,
+    padding: isMobile ? spacing.lg : spacing.xxl,
+    paddingBottom: isMobile ? spacing.md : spacing.lg,
+    backgroundColor: colors.cardBackground,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   backButton: {
     alignSelf: 'flex-start',
-    padding: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.sm,
-    marginBottom: isMobile ? spacing.md : spacing.lg,
-    minHeight: 44,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md,
+    marginBottom: isMobile ? spacing.lg : spacing.xl,
+    minHeight: 48,
     justifyContent: 'center',
+    backgroundColor: colors.buttonBackground,
   },
   backButtonText: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
+    fontSize: isMobile ? fontSize.md : fontSize.lg,
+    color: colors.textPrimary,
+    fontWeight: '600',
   },
   titleContainer: {
-    marginBottom: spacing.md,
+    marginBottom: spacing.xs,
   },
   title: {
-    fontSize: isMobile ? fontSize.xxl : fontSize.xxxl,
-    fontWeight: '600',
+    fontSize: isMobile ? fontSize.xl : fontSize.xxl,
+    fontWeight: '700',
     color: colors.textPrimary,
-    letterSpacing: -0.5,
-    marginBottom: spacing.xs,
+    letterSpacing: -0.6,
+    marginBottom: spacing.sm,
+    lineHeight: isMobile ? fontSize.xl * 1.3 : fontSize.xxl * 1.2,
   },
   subtitle: {
     fontSize: isMobile ? fontSize.sm : fontSize.md,
     color: colors.textSecondary,
-    lineHeight: fontSize.sm * 1.5,
+    lineHeight: isMobile ? fontSize.sm * 1.6 : fontSize.md * 1.6,
   },
   listContent: {
-    padding: isMobile ? spacing.xl : spacing.xxxl,
-    paddingTop: 0,
-    gap: spacing.md,
+    padding: isMobile ? spacing.lg : spacing.xxl,
+    paddingTop: isMobile ? spacing.lg : spacing.xl,
+    paddingBottom: spacing.xxxl,
   },
   resourceCard: {
-    borderRadius: borderRadius.lg,
+    borderRadius: isMobile ? borderRadius.lg : borderRadius.xl,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.cardBackground,
     overflow: 'hidden',
-    marginBottom: spacing.md,
+    marginBottom: isMobile ? spacing.lg : spacing.xl,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   resourceCardLocked: {
     backgroundColor: colors.cardBackgroundLocked,
@@ -241,12 +263,22 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     backgroundColor: colors.cardBackground,
   },
+  resourceCardNext: {
+    borderColor: colors.textPrimary,
+    borderWidth: 3,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
   resourceHeader: {
     padding: isMobile ? spacing.lg : spacing.xl,
     flexDirection: isMobile ? 'column' : 'row',
     justifyContent: 'space-between',
     alignItems: isMobile ? 'stretch' : 'center',
-    gap: isMobile ? spacing.md : 0,
+    gap: isMobile ? spacing.lg : 0,
+    minHeight: 80,
   },
   resourceInfo: {
     flex: 1,
@@ -254,31 +286,34 @@ const styles = StyleSheet.create({
   resourceTitleRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
+    gap: spacing.md,
+    marginBottom: spacing.sm,
   },
   resourceIndex: {
-    fontSize: fontSize.sm,
+    fontSize: isMobile ? fontSize.md : fontSize.lg,
     color: colors.textSecondary,
-    fontWeight: '500',
+    fontWeight: '700',
     marginTop: 2,
+    minWidth: 24,
   },
   resourceTitle: {
-    fontSize: isMobile ? fontSize.sm + 1 : fontSize.md,
-    fontWeight: '500',
+    fontSize: isMobile ? fontSize.md : fontSize.lg,
+    fontWeight: '600',
     color: colors.textPrimary,
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
     flex: 1,
-    lineHeight: fontSize.md * 1.3,
+    lineHeight: isMobile ? fontSize.md * 1.4 : fontSize.lg * 1.4,
   },
   resourceMeta: {
-    fontSize: fontSize.xs,
-    color: colors.textTertiary,
-    marginTop: spacing.xs / 2,
+    fontSize: isMobile ? fontSize.sm : fontSize.md,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+    marginLeft: isMobile ? 36 : 40,
+    lineHeight: isMobile ? fontSize.sm * 1.4 : fontSize.md * 1.4,
   },
   inProgressBadge: {
     color: colors.primary,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   resourceActions: {
     flexDirection: 'row',
@@ -286,51 +321,66 @@ const styles = StyleSheet.create({
     justifyContent: isMobile ? 'flex-start' : 'flex-end',
     gap: spacing.md,
   },
+  completedIconContainer: {
+    padding: spacing.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   actionButton: {
-    paddingHorizontal: isMobile ? spacing.md : spacing.lg,
-    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: isMobile ? spacing.lg : spacing.xl,
+    paddingVertical: isMobile ? spacing.md : spacing.md + 2,
     borderRadius: borderRadius.full,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.buttonBorder,
     backgroundColor: 'transparent',
-    minHeight: 44,
+    minHeight: 48,
     justifyContent: 'center',
     flex: isMobile ? 1 : 0,
+    minWidth: isMobile ? undefined : 140,
   },
   actionButtonDisabled: {
     backgroundColor: colors.buttonBackground,
+    borderWidth: 1,
+    opacity: 0.6,
   },
   actionButtonInProgress: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
   actionButtonText: {
-    fontSize: isMobile ? fontSize.sm - 1 : fontSize.sm,
+    fontSize: isMobile ? fontSize.sm : fontSize.md,
     color: colors.textPrimary,
     textAlign: 'center',
+    fontWeight: '600',
   },
   actionButtonTextDisabled: {
     color: colors.textTertiary,
+    fontWeight: '500',
   },
   actionButtonTextInProgress: {
     color: colors.primaryLight,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   resourceDetails: {
     paddingHorizontal: isMobile ? spacing.lg : spacing.xl,
-    paddingBottom: isMobile ? spacing.lg : spacing.xl,
+    paddingBottom: isMobile ? spacing.xl : spacing.xxl,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
   resourceDescription: {
-    fontSize: isMobile ? fontSize.sm - 1 : fontSize.sm,
+    fontSize: isMobile ? fontSize.sm : fontSize.md,
     color: colors.textSecondary,
-    lineHeight: fontSize.sm * 1.5,
-    marginBottom: spacing.lg,
+    lineHeight: isMobile ? fontSize.sm * 1.6 : fontSize.md * 1.6,
+    marginBottom: isMobile ? spacing.lg : spacing.xl,
   },
   thumbnailContainer: {
-    height: 240,
-    borderRadius: borderRadius.md,
+    height: isMobile ? 200 : 240,
+    borderRadius: isMobile ? borderRadius.md : borderRadius.lg,
     overflow: 'hidden',
     position: 'relative',
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   thumbnail: {
     width: '100%',
@@ -344,8 +394,8 @@ const styles = StyleSheet.create({
   },
   thumbnailText: {
     color: colors.primaryLight,
-    fontSize: fontSize.md,
-    fontWeight: '500',
+    fontSize: isMobile ? fontSize.md : fontSize.lg,
+    fontWeight: '600',
     letterSpacing: 0.3,
   },
 });

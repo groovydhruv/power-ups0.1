@@ -30,6 +30,7 @@ export const fonts = {
 };
 
 export const spacing = {
+  xxs: 2,
   xs: 4,
   sm: 8,
   md: 12,
@@ -37,24 +38,29 @@ export const spacing = {
   xl: 20,
   xxl: 24,
   xxxl: 32,
+  xxxxl: 40,
 };
 
 export const borderRadius = {
+  xs: 2,
   sm: 4,
   md: 8,
   lg: 12,
   xl: 16,
+  xxl: 20,
   full: 9999,
 };
 
 export const fontSize = {
-  xs: 11,
-  sm: 13,
-  md: 15,
-  lg: 17,
-  xl: 20,
-  xxl: 24,
-  xxxl: 32,
+  xxs: 10,
+  xs: 12,
+  sm: 14,
+  md: 16,
+  lg: 18,
+  xl: 22,
+  xxl: 28,
+  xxxl: 34,
+  xxxxl: 40,
 };
 
 // Minimum touch target size for mobile (iOS Human Interface Guidelines)

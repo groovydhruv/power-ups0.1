@@ -64,6 +64,8 @@ export default function AppNavigator({
           <VoiceConversation
             {...props}
             resource={props.route.params.resource}
+            topics={topics}
+            resources={resources}
             onExit={() => props.navigation.goBack()}
           />
         )}
