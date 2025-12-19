@@ -324,18 +324,19 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flex: 1,
-    padding: isMobile ? spacing.lg : spacing.xxl,
+    padding: isMobile ? spacing.md : spacing.lg,
+    paddingTop: isMobile ? spacing.md : spacing.lg,
     justifyContent: 'space-between',
   },
   cardInfo: {
-    flex: 1,
+    marginBottom: spacing.xs,
   },
   cardTitle: {
     fontSize: isMobile ? fontSize.lg : fontSize.xl,
     fontWeight: '700',
     color: colors.textPrimary,
     letterSpacing: -0.5,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
     lineHeight: isMobile ? fontSize.lg * 1.3 : fontSize.xl * 1.3,
   },
   cardDescription: {
@@ -345,7 +346,7 @@ const styles = StyleSheet.create({
   },
   progressContainer: {
     gap: spacing.sm,
-    marginTop: spacing.md,
+    marginTop: spacing.xs,
   },
   progressLabel: {
     fontSize: isMobile ? fontSize.xs : fontSize.sm,
