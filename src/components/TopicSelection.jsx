@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
   },
   cardImage: {
-    height: '55%',
+    height: '65%',
     justifyContent: 'center',
     alignItems: 'center',
   },
