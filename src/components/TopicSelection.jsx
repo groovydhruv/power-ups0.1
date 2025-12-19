@@ -57,12 +57,6 @@ export default function TopicSelection({ onSelectTopic, topics = [], resources =
             </Text>
           )}
 
-          {/* Subtitle */}
-          <Text style={styles.subtitle}>
-            Consume each resource thoroughly. Validate your insights and knowledge with a
-            conversation. That's the only way to progress.
-          </Text>
-
           {/* Stats Cards - Prominent */}
           <View style={styles.statsContainer}>
             {/* Level Card */}
@@ -217,16 +211,10 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontWeight: '600',
   },
-  subtitle: {
-    fontSize: isMobile ? fontSize.sm : fontSize.md,
-    color: colors.textSecondary,
-    lineHeight: isMobile ? fontSize.sm * 1.6 : fontSize.md * 1.6,
-    marginBottom: spacing.xl,
-  },
   statsContainer: {
     flexDirection: 'row',
     gap: isMobile ? spacing.md : spacing.lg,
-    marginTop: spacing.lg,
+    marginTop: spacing.xl,
     width: '100%',
   },
   statCard: {
