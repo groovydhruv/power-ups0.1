@@ -40,6 +40,7 @@ export const resources = {
       order: 1,
       thumbnail: 'https://img.youtube.com/vi/UF8uR6Z6KLc/maxresdefault.jpg',
       link: 'https://youtu.be/UF8uR6Z6KLc',
+      powerupId: 1, // Maps to powerup_metadata entry
     },
     {
       id: 'week-one-2',
@@ -50,6 +51,7 @@ export const resources = {
       order: 2,
       thumbnail: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=800&h=450&fit=crop&q=80',
       link: 'https://open.spotify.com/episode/5W0RQCDr28VSxVZOYJn3f5?si=20b6807459b24767',
+      powerupId: 2,
     },
   ],
   'week-two': [
@@ -62,6 +64,7 @@ export const resources = {
       order: 1,
       thumbnail: 'https://img.youtube.com/vi/BHyVg2sXy5w/maxresdefault.jpg',
       link: 'https://youtu.be/BHyVg2sXy5w',
+      powerupId: 3,
     },
     {
       id: 'week-two-2',
@@ -72,6 +75,7 @@ export const resources = {
       order: 2,
       thumbnail: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=450&fit=crop&q=80',
       link: 'https://www.dropbox.com/s/tv3w0zdebj1x3z6/Self',
+      powerupId: 4,
     },
     {
       id: 'week-two-3',
@@ -82,6 +86,7 @@ export const resources = {
       order: 3,
       thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=450&fit=crop&q=80',
       link: 'https://markmanson.net/self-awareness',
+      powerupId: 5,
     },
     {
       id: 'week-two-4',
@@ -92,6 +97,7 @@ export const resources = {
       order: 4,
       thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=450&fit=crop&q=80',
       link: 'http://www.pursuit-of-happiness.org/history-of-happiness/aristotle/',
+      powerupId: 6,
     },
   ],
   'week-three': [
@@ -104,6 +110,7 @@ export const resources = {
       order: 1,
       thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop&q=80',
       link: 'https://www.lifeoptimizer.org/2018/02/10/being-intentional/',
+      powerupId: 7,
     },
     {
       id: 'week-three-2',
@@ -114,6 +121,7 @@ export const resources = {
       order: 2,
       thumbnail: 'https://img.youtube.com/vi/zEESDrgidRM/maxresdefault.jpg',
       link: 'https://youtu.be/zEESDrgidRM',
+      powerupId: 8,
     },
     {
       id: 'week-three-3',
@@ -124,6 +132,7 @@ export const resources = {
       order: 3,
       thumbnail: 'https://img.youtube.com/vi/5J6jAC6XxAI/maxresdefault.jpg',
       link: 'https://youtu.be/5J6jAC6XxAI',
+      powerupId: 9,
     },
     {
       id: 'week-three-4',
@@ -134,6 +143,7 @@ export const resources = {
       order: 4,
       thumbnail: 'https://img.youtube.com/vi/Q9qjX1UhNo0/maxresdefault.jpg',
       link: 'https://youtu.be/Q9qjX1UhNo0',
+      powerupId: 10,
     },
     {
       id: 'week-three-5',
@@ -144,6 +154,7 @@ export const resources = {
       order: 5,
       thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=450&fit=crop&q=80',
       link: 'http://www.marcandangel.com/2018/03/25/19-great-truths-my-grandmother-told-me-on-her-90th-birthday/',
+      powerupId: 11,
     },
   ],
   'week-four': [
@@ -156,6 +167,7 @@ export const resources = {
       order: 1,
       thumbnail: 'https://img.youtube.com/vi/arj7oStGLkU/maxresdefault.jpg',
       link: 'https://youtu.be/arj7oStGLkU',
+      powerupId: 12,
     },
     {
       id: 'week-four-2',
@@ -166,6 +178,7 @@ export const resources = {
       order: 2,
       thumbnail: 'https://img.youtube.com/vi/fbAYK4KQrso/maxresdefault.jpg',
       link: 'https://youtu.be/fbAYK4KQrso',
+      powerupId: 13,
     },
     {
       id: 'week-four-3',
@@ -176,6 +189,7 @@ export const resources = {
       order: 3,
       thumbnail: 'https://img.youtube.com/vi/tT89OZ7TNwc/maxresdefault.jpg',
       link: 'https://youtu.be/tT89OZ7TNwc',
+      powerupId: 14,
     },
     {
       id: 'week-four-4',
@@ -186,6 +200,7 @@ export const resources = {
       order: 4,
       thumbnail: 'https://img.youtube.com/vi/YT7tQzmGRLA/maxresdefault.jpg',
       link: 'https://youtu.be/YT7tQzmGRLA',
+      powerupId: 15,
     },
     {
       id: 'week-four-5',
@@ -196,6 +211,7 @@ export const resources = {
       order: 5,
       thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=450&fit=crop&q=80',
       link: 'https://podcastnotes.org/naval-periscope-sessions/naval-kapil/',
+      powerupId: 16,
     },
     {
       id: 'week-four-6',
@@ -206,6 +222,7 @@ export const resources = {
       order: 6,
       thumbnail: 'https://img.youtube.com/vi/39RS3XbT2pU/maxresdefault.jpg',
       link: 'https://youtu.be/39RS3XbT2pU',
+      powerupId: 17,
     },
   ],
 };

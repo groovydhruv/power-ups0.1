@@ -1,26 +1,28 @@
 /**
- * STUB IMPLEMENTATION - Supabase Client for React Native
+ * Supabase Client Configuration
  * 
- * TODO FOR DEVELOPERS:
- * 1. Install Supabase: npm install @supabase/supabase-js
- * 2. Create a .env file with:
- *    - SUPABASE_URL=your_supabase_url
- *    - SUPABASE_ANON_KEY=your_anon_key
- * 3. Install react-native-dotenv for environment variables
- * 4. Import and initialize the real Supabase client below
- * 
- * Example real implementation:
- * 
- * import { createClient } from '@supabase/supabase-js';
- * import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@env';
- * 
- * export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
- * 
- * For now, this exports null to allow the app to run with mock data.
+ * Connects to the Supabase backend for the powerups schema
  */
 
-// Mock client for prototype
-export const supabase = null;
+import { createClient } from '@supabase/supabase-js';
+
+// Environment variables - works with both Expo and web
+const getEnvVar = (key, defaultValue) => {
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key];
+  }
+  return defaultValue;
+};
+
+const SUPABASE_URL = getEnvVar('VITE_SUPABASE_URL', 'https://gzyfqozaremfkgrkrufb.supabase.co');
+const SUPABASE_KEY = getEnvVar('VITE_SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6eWZxb3phcmVtZmtncmtydWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMTM0MTgsImV4cCI6MjA2MjY4OTQxOH0.RPrgyxHwtFeSSjTgdS5QgnISr5-FfD9Md4PYoXQn3g4');
+
+console.log('[Supabase] Initializing client with custom schema: powerups');
+export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  db: {
+    schema: 'powerups'
+  }
+});
 
 // Helper to check if Supabase is ready
 export const isSupabaseReady = () => {

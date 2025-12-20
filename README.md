@@ -1,280 +1,91 @@
-# Learning Platform - React Native Mobile App
+# Power-Ups Learning Platform 🚀💎✨
 
-A mobile learning platform built with React Native, featuring topics, resources, progress tracking, and voice conversations. This is a **UI prototype** ready for backend integration.
+A modern, gamified learning platform featuring **Navi**, an AI-powered Socratic teacher. This project offers a seamless experience across web and mobile (iOS/Android) using React Native and Expo.
 
-## 🎯 Overview
+## 🌟 Key Features
 
-This app has been converted from a web application to a React Native mobile app prototype. It includes:
+### 🎙️ Voice Walkie-Talkie with Navi
+*   **Real-time AI Conversations**: Engage in natural, low-latency voice discussions with Navi.
+*   **Socratic Teaching**: Navi guides learners through questions, encouraging deep understanding instead of rote memorization.
+*   **Cloud Audio Persistence**: All voice messages are stored in Supabase storage for persistent history and instant replay.
+*   **Smart Greetings**: Navi intelligently greets you only on your first visit to a resource.
 
-- ✅ Full mobile UI with native components
-- ✅ Navigation system (React Navigation)
-- ✅ Local storage with AsyncStorage
-- ✅ Mock data for prototyping
-- ✅ Stub implementations for Supabase and LiveKit
-- ✅ Comprehensive integration guide for developers
+### 🎮 Gamification System
+*   **XP & Leveling**: Earn XP for completing resources and engaging in conversations.
+*   **Streak Tracking**: Maintain your learning momentum with daily streak tracking.
+*   **Progress Persistence**: Your stats, progress, and conversation history are securely stored in Supabase.
 
-## 📱 Features
+### 📺 Integrated Learning Content
+*   **Resource Management**: Topics are broken down into curated resources (Videos, Articles, etc.).
+*   **In-App Video Player**: Watch educational videos directly within the app without external redirects.
+*   **Unlockable Content**: Sequential learning path ensures foundational topics are mastered first.
 
-- **User Authentication**: Simple username-based auth with AsyncStorage
-- **Topic Selection**: Browse and unlock topics based on progress
-- **Resource Management**: Track resources with start/complete states
-- **Progress Tracking**: Visual progress bars and completion tracking
-- **Voice Conversations**: Mock UI ready for LiveKit integration
-- **Offline Support**: Works with mock data, syncs when backend is integrated
+## 🛠️ Technical Stack
 
-## 🚀 Quick Start
+*   **Frontend**: React Native (Expo)
+*   **Web Support**: Expo Web / Vite
+*   **Database & Storage**: Supabase (PostgreSQL, Storage Buckets)
+*   **Voice Engine**: Gemini 3 Flash (via Backend Proxy)
+*   **Audio Handling**: 
+    *   **Mobile**: `expo-av`, `expo-file-system`
+    *   **Web**: Web Audio API, MediaRecorder
+*   **Styling**: Custom theme-based design system
+
+## 🚀 Getting Started
 
 ### Prerequisites
-
-- Node.js 16+ and npm/yarn
-- React Native development environment
-  - **iOS**: Xcode 14+ and CocoaPods
-  - **Android**: Android Studio and SDK
+*   Node.js (v18+)
+*   npm or yarn
+*   Expo Go app (for mobile testing)
+*   A running [Voice Backend Proxy](https://github.com/your-username/voice-backend)
 
 ### Installation
 
-```bash
-# Install dependencies
-npm install
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/your-username/power-ups0.1.git
+    cd power-ups0.1
+    ```
 
-# iOS: Install pods
-cd ios && pod install && cd ..
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-# Run on iOS
-npm run ios
+3.  **Environment Setup**:
+    Create a `.env` file in the root directory and add your Supabase and Backend details:
+    ```env
+    VITE_SUPABASE_URL=your_supabase_url
+    VITE_SUPABASE_KEY=your_supabase_anon_key
+    VITE_VOICE_BACKEND_URL=http://localhost:8000
+    ```
 
-# Run on Android
-npm run android
-```
+4.  **Database Setup**:
+    Run the SQL scripts provided in `supabase-schema.sql` and `populate-powerup-metadata.sql` within your Supabase SQL editor. Ensure the `powerups` schema is exposed in your project settings.
 
-## 📁 Project Structure
+### Running the App
 
-```
-project-dashboard-ui/
-├── App.js                          # Main app component
-├── index.js                        # React Native entry point
-├── app.json                        # App metadata
-├── babel.config.js                 # Babel configuration
-├── metro.config.js                 # Metro bundler config
-├── package.json                    # Dependencies
-│
-├── src/
-│   ├── components/                 # React Native components
-│   │   ├── Icons.jsx              # SVG icons (react-native-svg)
-│   │   ├── UsernameScreen.jsx     # Username input screen
-│   │   ├── TopicSelection.jsx     # Topics grid with ScrollView
-│   │   ├── ResourceList.jsx       # Resources with FlatList
-│   │   └── VoiceConversation.jsx  # Mock voice conversation UI
-│   │
-│   ├── context/
-│   │   └── ProgressContext.jsx    # Progress tracking (AsyncStorage)
-│   │
-│   ├── data/
-│   │   └── mockData.js            # Mock topics and resources
-│   │
-│   ├── lib/
-│   │   ├── dataApi.js             # Data fetching (mock/Supabase)
-│   │   ├── supabaseClient.js      # Supabase stub
-│   │   └── livekitClient.js       # LiveKit stub
-│   │
-│   ├── navigation/
-│   │   └── AppNavigator.jsx       # Stack Navigator
-│   │
-│   └── styles/
-│       ├── theme.js               # Theme colors and constants
-│       └── commonStyles.js        # Shared StyleSheet styles
-│
-├── INTEGRATION_GUIDE.md           # Developer integration guide
-└── README.md                      # This file
-```
+*   **Web**: `npm run web`
+*   **iOS/Android (Expo Go)**: `npm start` (then scan the QR code)
 
-## 🔧 Key Conversions from Web to Mobile
+## 🌍 Deployment
 
-| Web Technology | React Native Replacement |
-|----------------|-------------------------|
-| `<div>` | `<View>` |
-| `<button>` | `<TouchableOpacity>` |
-| `<p>`, `<h1>`, `<h2>` | `<Text>` |
-| `<input>` | `<TextInput>` |
-| `localStorage` | `AsyncStorage` |
-| CSS / inline styles | `StyleSheet.create()` |
-| React Router | React Navigation |
-| SVG | `react-native-svg` |
-| Hover effects | Press states |
-| `backgroundImage` | `<ImageBackground>` |
+### Web (GitHub Pages)
+The project is configured for easy deployment to GitHub Pages:
+1.  Update the `homepage` field in `package.json` with your URL.
+2.  Run the deployment script:
+    ```bash
+    npm run deploy
+    ```
 
-## 🎨 UI Components
-
-### UsernameScreen
-- TextInput with keyboard handling
-- KeyboardAvoidingView for iOS
-- AsyncStorage for persistence
-
-### TopicSelection
-- ScrollView with topic cards
-- ImageBackground for topic images
-- Progress bars with percentage
-- Lock/unlock logic based on completion
-
-### ResourceList
-- FlatList for performance
-- Expandable resource cards
-- Thumbnail with press to open
-- Status tracking (Start → Complete → Conversation)
-
-### VoiceConversation
-- Mock UI with timer
-- Animated pulse indicator
-- Microphone toggle (UI only)
-- Ready for LiveKit integration
-
-## 📊 Data Flow
-
-```
-┌─────────────────┐
-│  AsyncStorage   │  ← Local persistence
-└────────┬────────┘
-         │
-         ↓
-┌─────────────────┐
-│ ProgressContext │  ← State management
-└────────┬────────┘
-         │
-         ↓
-┌─────────────────┐
-│   Components    │  ← UI rendering
-└────────┬────────┘
-         │
-         ↓
-┌─────────────────┐
-│    dataApi      │  ← Mock data (ready for Supabase)
-└─────────────────┘
-```
-
-## 🔗 Backend Integration
-
-This is a **UI prototype** using mock data. To integrate with your backend:
-
-### 1. Supabase Integration
-See **[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)** for detailed instructions on:
-- Setting up Supabase client
-- Database schema
-- Replacing mock data with real API calls
-
-### 2. LiveKit Integration
-See **[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)** for:
-- Installing LiveKit dependencies
-- Setting up iOS/Android permissions
-- Creating token endpoint
-- Replacing mock voice UI with real WebRTC
-
-### 3. Environment Variables
-Create `.env` file:
-```bash
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-anon-key
-LIVEKIT_API_URL=https://your-backend.com/api/livekit-token
-```
-
-## 📱 Mobile-Specific Features
-
-### Touch Targets
-All interactive elements meet the **44x44 point minimum** (iOS HIG standard)
-
-### Safe Areas
-Uses `SafeAreaView` to avoid notches and home indicators
-
-### Keyboard Handling
-- `KeyboardAvoidingView` for text inputs
-- Automatic keyboard dismissal
-
-### Navigation
-- Stack Navigator with native gestures
-- Back swipe on iOS
-- Hardware back button on Android
-
-### Performance
-- `FlatList` for efficient list rendering
-- `ImageBackground` for optimized image loading
-- Minimal re-renders with proper state management
-
-## 🧪 Testing
-
-### With Mock Data (Current)
-```bash
-npm run ios    # iOS Simulator
-npm run android # Android Emulator
-```
-
-The app will work fully with mock data from `src/data/mockData.js`
-
-### After Backend Integration
-1. Set up `.env` with real credentials
-2. Follow integration guide to connect Supabase
-3. Follow integration guide to connect LiveKit
-4. Test on real devices for permissions (microphone, etc.)
-
-## 🐛 Troubleshooting
-
-### Metro Bundler Issues
-```bash
-npx react-native start --reset-cache
-```
-
-### iOS Build Issues
-```bash
-cd ios && rm -rf Pods Podfile.lock && pod install && cd ..
-```
-
-### Android Build Issues
-```bash
-cd android && ./gradlew clean && cd ..
-```
-
-See **[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)** for more troubleshooting tips.
-
-## 📦 Dependencies
-
-### Core
-- `react-native` - Mobile framework
-- `react` - UI library
-- `@react-navigation/native` - Navigation
-- `@react-navigation/stack` - Stack navigator
-
-### Storage & Data
-- `@react-native-async-storage/async-storage` - Local storage
-
-### UI Components
-- `react-native-svg` - SVG support
-- `react-native-safe-area-context` - Safe area handling
-- `react-native-gesture-handler` - Gesture support
-- `react-native-screens` - Native screen optimization
-
-### To Be Integrated
-- `@supabase/supabase-js` - Database (install when ready)
-- `@livekit/react-native` - Voice chat (install when ready)
-
-## 🎯 Next Steps for Developers
-
-1. ✅ **Review the code structure** - Familiarize yourself with components
-2. ✅ **Test the prototype** - Run on simulators/emulators
-3. 📖 **Read INTEGRATION_GUIDE.md** - Understand backend integration
-4. 🔧 **Set up Supabase** - Follow integration guide
-5. 🎙️ **Set up LiveKit** - Follow integration guide
-6. 🚀 **Deploy** - Build for iOS App Store / Google Play Store
-
-## 📚 Resources
-
-- [React Native Documentation](https://reactnative.dev/)
-- [React Navigation](https://reactnavigation.org/)
-- [Supabase React Native Guide](https://supabase.com/docs/guides/getting-started/tutorials/with-react-native)
-- [LiveKit React Native](https://docs.livekit.io/client-sdk-js/react-native/)
+## 🛡️ Security & Privacy
+*   **Keys**: Sensitive API keys are managed server-side and never exposed to the client.
+*   **Permissions**: Microphone access is requested only when starting a voice conversation.
+*   **Data**: All user progress is isolated and protected via Supabase Row Level Security (RLS).
 
 ## 📄 License
-
-ISC
+This project is private and for internal use.
 
 ---
 
-**Built with ❤️ as a UI prototype ready for your backend integration**
-
+**Developed with ❤️ by the Power-Ups Team.**

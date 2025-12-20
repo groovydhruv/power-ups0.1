@@ -13,6 +13,7 @@ import {
 import { useProgress } from '../context/ProgressContext';
 import { ChevronDownIcon, ChevronUpIcon, CheckIcon, LockIcon } from './Icons';
 import { colors, spacing, borderRadius, fontSize } from '../styles/theme';
+import VideoModal from './VideoModal';
 
 const { width } = Dimensions.get('window');
 const isMobile = width < 600;
@@ -20,6 +21,7 @@ const isMobile = width < 600;
 export default function ResourceList({ topic, resources = {}, onBack, onStartConversation }) {
   const { getResourceStatus, isResourceUnlocked, markResourceStarted, markResourceComplete } = useProgress();
   const [expanded, setExpanded] = useState({});
+  const [videoModal, setVideoModal] = useState({ visible: false, url: '', title: '' });
   const topicResources = resources[topic.id] || [];
   const sortedResources = [...topicResources].sort((a, b) => a.order - b.order);
 
@@ -39,6 +41,9 @@ export default function ResourceList({ topic, resources = {}, onBack, onStartCon
     if (!status.started) {
       setExpanded((prev) => ({ ...prev, [resource.id]: true }));
       markResourceStarted(resource.id);
+      if (resource.type === 'video' || resource.type === 'Video') {
+        openResourceLink(resource);
+      }
     } else if (status.started && !status.completed) {
       markResourceComplete(resource.id);
     } else if (status.conversationInProgress || (status.completed && !status.conversationCompleted)) {
@@ -55,9 +60,15 @@ export default function ResourceList({ topic, resources = {}, onBack, onStartCon
     return 'Completed';
   };
 
-  const openResourceLink = (link) => {
-    if (link) {
-      Linking.openURL(link).catch((err) => 
+  const openResourceLink = (resource) => {
+    if (resource.type === 'video' || resource.type === 'Video') {
+      setVideoModal({
+        visible: true,
+        url: resource.link,
+        title: resource.title
+      });
+    } else if (resource.link) {
+      Linking.openURL(resource.link).catch((err) => 
         console.warn('Failed to open URL:', err)
       );
     }
@@ -139,7 +150,7 @@ export default function ResourceList({ topic, resources = {}, onBack, onStartCon
                     {resource.thumbnail && (
               <TouchableOpacity
                 style={styles.thumbnailContainer}
-                onPress={() => openResourceLink(resource.link)}
+                onPress={() => openResourceLink(resource)}
                 activeOpacity={0.8}
               >
                 <Image
@@ -184,6 +195,14 @@ export default function ResourceList({ topic, resources = {}, onBack, onStartCon
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={true}
+        />
+
+        {/* Video Modal */}
+        <VideoModal
+          visible={videoModal.visible}
+          videoUrl={videoModal.url}
+          title={videoModal.title}
+          onClose={() => setVideoModal({ ...videoModal, visible: false })}
         />
       </View>
     </SafeAreaView>

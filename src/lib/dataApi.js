@@ -1,45 +1,34 @@
 /**
- * Data API - Returns mock data for prototype
- * 
- * TODO FOR DEVELOPERS:
- * Replace the implementations below with actual Supabase queries.
- * The data structure is already set up - just uncomment and modify
- * the Supabase calls when ready.
+ * Data API - Connects to Supabase backend
  */
 
 import { supabase } from './supabaseClient';
 import { topics as fallbackTopics, resources as fallbackResources } from '../data/mockData';
 
-export const isSupabaseReady = false; // Set to true when Supabase is configured
+export const isSupabaseReady = true;
 
 /**
- * Fetch topics (or powerups) from the backend
- * Currently returns mock data
- * 
- * TODO: Replace with actual Supabase query when ready
+ * Fetch topics (powerups) from Supabase
  */
 export async function fetchTopics() {
-  // For prototype, always return mock data
-  console.log('[dataApi] Using mock topics data');
-  return fallbackTopics;
-
-  /* TODO: Uncomment when Supabase is configured
-  if (!isSupabaseReady || !supabase) {
-    console.warn('[dataApi] Supabase not configured, using fallback topics');
-    return fallbackTopics;
-  }
-  
+  console.log('[dataApi] 🔄 Fetching topics from Supabase...');
   try {
     const { data, error } = await supabase
       .from('powerup_metadata')
       .select('id, title, theme, context, url, key_topics, transcript, created_at')
       .order('created_at', { ascending: true });
       
-    if (error) throw error;
+    if (error) {
+      console.error('[dataApi] ❌ Supabase fetchTopics failed:', error);
+      throw error;
+    }
+    
     if (!data || data.length === 0) {
-      console.warn('[dataApi] powerup_metadata empty, using fallback topics');
+      console.warn('[dataApi] ⚠️ No topics found in powerup_metadata, using mock data');
       return fallbackTopics;
     }
+    
+    console.log(`[dataApi] ✅ Fetched ${data.length} topics from DB`);
     
     return data.map((p) => ({
       id: `powerup-${p.id}`,
@@ -55,39 +44,32 @@ export async function fetchTopics() {
       url: p.url || '',
     }));
   } catch (err) {
-    console.warn('Supabase fetchTopics failed:', err?.message || err);
+    console.error('[dataApi] ❌ Fatal error in fetchTopics:', err);
     return fallbackTopics;
   }
-  */
 }
 
 /**
- * Fetch resources grouped by topic
- * Currently returns mock data
- * 
- * TODO: Replace with actual Supabase query when ready
+ * Fetch resources from Supabase
  */
 export async function fetchResourcesByTopic() {
-  // For prototype, always return mock data
-  console.log('[dataApi] Using mock resources data');
-  return fallbackResources;
-
-  /* TODO: Uncomment when Supabase is configured
-  if (!isSupabaseReady || !supabase) {
-    console.warn('[dataApi] Supabase not configured, using fallback resources');
-    return fallbackResources;
-  }
-  
+  console.log('[dataApi] 🔄 Fetching resources from Supabase...');
   try {
     const { data, error } = await supabase
       .from('powerup_metadata')
       .select('id, title, theme, context, url, key_topics, transcript, created_at');
       
-    if (error) throw error;
+    if (error) {
+      console.error('[dataApi] ❌ Supabase fetchResources failed:', error);
+      throw error;
+    }
+    
     if (!data || data.length === 0) {
-      console.warn('[dataApi] powerup_metadata empty, using fallback resources');
+      console.warn('[dataApi] ⚠️ No resources found in powerup_metadata, using mock data');
       return fallbackResources;
     }
+
+    console.log(`[dataApi] ✅ Fetched resources for ${data.length} powerups from DB`);
 
     const grouped = {};
     data.forEach((p) => {
@@ -110,8 +92,7 @@ export async function fetchResourcesByTopic() {
 
     return grouped;
   } catch (err) {
-    console.warn('Supabase fetchResources failed:', err?.message || err);
+    console.error('[dataApi] ❌ Fatal error in fetchResourcesByTopic:', err);
     return fallbackResources;
   }
-  */
 }
